@@ -24,8 +24,12 @@ class SimplerXMLGenerator(XMLGenerator):
         if content and re.search(r"[\x00-\x08\x0B-\x0C\x0E-\x1F]", content):
             # Fail loudly when content has control chars (unsupported in XML 1.0)
             # See https://www.w3.org/International/questions/qa-controls
+            bad_chars = re.findall(r"[\x00-\x08\x0B-\x0C\x0E-\x1F]", content)
+            bad_chars_hex = [hex(ord(c)) for c in bad_chars[:5]]
+            preview = content[:200] + "..." if len(content) > 200 else content
             raise UnserializableContentError(
-                "Control characters are not supported in XML 1.0"
+                f"Control characters {bad_chars_hex} are not supported in XML 1.0. "
+                f"Content preview: {preview!r}"
             )
         XMLGenerator.characters(self, content)
 
